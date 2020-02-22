@@ -1,3 +1,4 @@
+import sha256 from 'crypto-js/sha256';
 import $ from './request';
 import loadSw from './serviceworker';
 
@@ -10,6 +11,8 @@ export default function api(izitoast) {
       ) {
         izitoast.error('Please fill all fields');
       } else {
+        // eslint-disable-next-line
+        form.password = sha256(form.password).toString();
         $.ACCOUNT.LOGIN(form, (rs) => {
           if (rs.success) {
             localStorage.setItem('email', form.email);
@@ -31,6 +34,8 @@ export default function api(izitoast) {
       ) {
         izitoast.error('Please fill all fields');
       } else if (form.password === form.confirm) {
+        // eslint-disable-next-line
+        form.password = sha256(form.password).toString();
         $.ACCOUNT.REGISTER(form, cb);
       } else {
         izitoast.error("Passwords doesn't match");
