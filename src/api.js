@@ -56,7 +56,7 @@ export default function api(izitoast) {
           email: localStorage.getItem('email'),
           session: localStorage.getItem('session'),
         }, (rs) => {
-          if (rs.success) loadSw(this.addToken);
+          if (rs.success && window.location.protocol === 'https:') loadSw(this.addToken);
           cb(rs.success === true);
         });
       } else cb(false);

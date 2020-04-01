@@ -4,7 +4,7 @@ import 'izitoast/dist/css/iziToast.min.css';
 import app from './app.vue';
 import api from './api';
 
-if (window.location.protocol !== 'https:') {
+if (window.location.protocol !== 'https:' && window.location.port !== '8080') {
   window.location.replace(`https:${window.location.href.substring(window.location.protocol.length)}`);
 }
 
