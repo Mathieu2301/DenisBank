@@ -40,6 +40,10 @@ export default {
 </script>
 
 <style>
+:root {
+  touch-action: pan-x pan-y;
+}
+
 body {
   background-color: #19222D;
   margin: 0;
