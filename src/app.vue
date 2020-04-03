@@ -88,4 +88,10 @@ tr {
   user-select: none;
 }
 
+.center { text-align: center }
+.BR_TL { border-top-left-radius: 5px }
+.BR_TR { border-top-right-radius: 5px }
+.BR_BL { border-bottom-left-radius: 5px }
+.BR_BR { border-bottom-right-radius: 5px }
+
 </style>
