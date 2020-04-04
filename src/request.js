@@ -39,6 +39,9 @@ export default {
     PAY: rq('payDeal'),
     CANCEL: rq('cancelDeal'),
   },
+  TRADE: {
+    NEW: rq('newTrade'),
+  },
   USER: {
     SEARCH: rq('searchUser'),
   },

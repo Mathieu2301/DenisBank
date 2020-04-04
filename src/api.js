@@ -131,6 +131,17 @@ export default function api(izitoast) {
       });
     },
 
+    newTrade(trade, cb) {
+      $.TRADE.NEW({
+        email: localStorage.getItem('email'),
+        session: localStorage.getItem('session'),
+        ...trade,
+      }, (rs) => {
+        izitoast[rs.success ? 'success' : 'error'](rs.message);
+        cb(rs);
+      });
+    },
+
     onChanges(cb) {
       $.ACCOUNT.ONCHANGES({
         email: localStorage.getItem('email'),
