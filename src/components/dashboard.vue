@@ -420,7 +420,7 @@ export default {
       this.tab = 'market';
 
       // eslint-disable-next-line
-      new TradingView.widget({
+      new TradingView.Widget({
         autosize: true,
         symbol: market,
         interval: 'D',
