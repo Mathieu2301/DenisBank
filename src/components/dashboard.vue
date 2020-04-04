@@ -201,18 +201,52 @@
       </div>
 
       <div class="market_action_form">
+
+        <div class="separator_title">Position</div>
         <div class="columns_container">
           <div class="column">
-            <div class="BR_TL input_title red">Stop-Loss</div>
+            <div class="BR_TL input_title bg_red">Stop-Loss</div>
             <input class="BR_BL center" type="number" v-model="market_action.SL">
           </div>
           <div class="column">
-            <div class="input_title">Quantité</div>
+            <div class="input_title bg_grey">Quantité</div>
             <input class="center" type="number" v-model="market_action.amount">
           </div>
           <div class="column">
-            <div class="BR_TR input_title green">Take-Profit</div>
+            <div class="BR_TR input_title bg_green">Take-Profit</div>
             <input class="BR_BR center" type="number" v-model="market_action.TP">
+          </div>
+        </div>
+
+        <div class="separator_title">Effet de levier</div>
+        <div class="columns_container">
+          <div class="column">
+            <div class="grid_button BR_TL bg_green"
+              @click="market_action.leverage = 1"
+              :class="{ selected: market_action.leverage == 1 }">x1</div>
+            <div class="grid_button BR_BL bg_red"
+              @click="market_action.leverage = 10"
+              :class="{ selected: market_action.leverage == 10 }">x10</div>
+          </div>
+          <div class="column">
+            <div class="grid_button bg_green"
+              @click="market_action.leverage = 2"
+              :class="{ selected: market_action.leverage == 2 }">x2</div>
+            <div class="grid_button bg_red"
+              @click="market_action.leverage = 20"
+              :class="{ selected: market_action.leverage == 20 }">x20</div>
+          </div>
+          <div class="column">
+            <div class="grid_button BR_TR bg_green"
+              @click="market_action.leverage = 5"
+              :class="{ selected: market_action.leverage == 5 }">
+              x5
+            </div>
+            <div class="grid_button BR_BR bg_red"
+              @click="market_action.leverage = 30"
+              :class="{ selected: market_action.leverage == 30 }">x
+              30
+            </div>
           </div>
         </div>
       </div>
@@ -615,6 +649,10 @@ input[type=number] {
   margin: 0 5px;
 }
 
+.column {
+  width: 100%;
+}
+
 .input {
   margin: 7px auto;
   display: flex;
@@ -722,12 +760,24 @@ input[type=number] {
 }
 
 .input_title {
-  background-color: #293A48;
   line-height: 35px;
 }
 
-.input_title.red { background-color: #b93847 }
-.input_title.green { background-color: #059263 }
+.separator_title {
+  font-size: 20px;
+  text-align: left;
+  margin: 20px 0 2px 20px;
+}
+
+.grid_button {
+  cursor: pointer;
+  margin: 2px 1px;
+  line-height: 50px;
+  font-size: 22px;
+  user-select: none;
+}
+
+.grid_button:not(.selected) { background-color: #293A48 }
 
 .footer {
   position: fixed;

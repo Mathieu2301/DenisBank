@@ -84,6 +84,10 @@ tr {
 .text_green { color: #00e24c }
 .text_red { color: #f02f2f }
 
+.bg_green { background-color: #059263 }
+.bg_grey { background-color: #293A48 }
+.bg_red { background-color: #b93847 }
+
 .noselect * {
   user-select: none;
 }
