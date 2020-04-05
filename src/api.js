@@ -131,11 +131,47 @@ export default function api(izitoast) {
       });
     },
 
+    getTrades(cb) {
+      $.TRADING.GET_TRADES({
+        email: localStorage.getItem('email'),
+        session: localStorage.getItem('session'),
+      }, (rs) => {
+        if (rs.error) izitoast.error(rs.message);
+        cb(rs);
+      });
+    },
+
     newTrade(trade, cb) {
-      $.TRADE.NEW({
+      $.TRADING.NEW_TRADE({
         email: localStorage.getItem('email'),
         session: localStorage.getItem('session'),
         ...trade,
+      }, (rs) => {
+        izitoast[rs.success ? 'success' : 'error'](rs.message);
+        cb(rs);
+      });
+    },
+
+    closeTrade(trade, cb) {
+      $.TRADING.CLOSE_TRADE({
+        email: localStorage.getItem('email'),
+        session: localStorage.getItem('session'),
+        trade,
+      }, (rs) => {
+        izitoast[rs.success ? 'success' : 'error'](rs.message);
+        cb(rs);
+      });
+    },
+
+    fetchMarkets(cb) {
+      $.TRADING.FETCH_MARKETS({}, cb);
+    },
+
+    setFavMarkets(markets, cb) {
+      $.TRADING.SET_FAV_MARKETS({
+        email: localStorage.getItem('email'),
+        session: localStorage.getItem('session'),
+        markets,
       }, (rs) => {
         izitoast[rs.success ? 'success' : 'error'](rs.message);
         cb(rs);

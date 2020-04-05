@@ -42,7 +42,7 @@
       <div class="container noselect" v-if="pending_deals && pending_deals.length > 0">
         <div class="top">En attente</div>
         <div class="content">
-          <div class="deal" v-for="deal in pending_deals" :key="deal.id">
+          <div class="deal green" v-for="deal in pending_deals" :key="deal.id">
             <div class="title">
               <div>{{ deal.title }}</div>
               <div>{{ deal.amount | bignbr | addot }} €</div>
@@ -87,6 +87,75 @@
         </div>
       </div>
 
+      <div class="container noselect" v-if="user_trades && user_trades.active">
+        <div class="top">Trades</div>
+        <div class="content">
+          <div class="deal green" v-for="(trade, id) in user_trades.active" :key="id">
+            <div class="title">
+              <div>{{ trade.type }} - {{ trade.market }}</div>
+              <div>
+<template v-if="trade.variation > 0">+</template>{{ trade.variation * 100 | bignbr | addot }}%
+                (x{{ trade.leverage }})
+              </div>
+            </div>
+            <div class="flex">
+              <div>{{ trade.price | bignbr | addot}}</div>
+              <!-- eslint-disable-next-line -->
+              <svg viewBox="0 0 100 100"><path d=" M 91.75 51.8 Q 92.5 51.05 92.5 50 92.5 48.95 91.75 48.25 L 61.75 18.25 Q 61.05 17.5 60 17.5 58.95 17.5 58.2 18.25 57.5 18.95 57.5 20 57.5 21.05 58.2 21.8 L 83.95 47.5 10 47.5 Q 8.95 47.5 8.2 48.25 7.5 48.95 7.5 50 7.5 51.05 8.2 51.8 8.95 52.5 10 52.5 L 83.95 52.5 58.2 78.25 Q 57.5 78.95 57.5 80 57.5 81.05 58.2 81.8 58.95 82.5 60 82.5 61.05 82.5 61.75 81.8 L 91.75 51.8 Z"/></svg>
+              <div>{{ trade.market_price | bignbr | addot}}</div>
+            </div>
+            <div class="columns_container marged">
+              <div class="column">
+                <div class="BR_TL input_title bg_red">Stop-Loss</div>
+                <div class="BR_BL column_value">{{ trade.stop_loss | bignbr }} €</div>
+              </div>
+              <div class="column">
+                <div class="input_title bg_grey">Quantité</div>
+                <div class="column_value">{{ trade.amount | bignbr }} €</div>
+              </div>
+              <div class="column">
+                <div class="BR_TR input_title bg_green">Take-Profit</div>
+                <div class="BR_BR column_value">{{ trade.take_profit | bignbr }} €</div>
+              </div>
+            </div>
+            <div class="bottom_onebtn">
+              <div class="cancel" @click="closeTrade(id)">
+                Fermer
+                (<template v-if="trade.gain > 0">+</template>{{ trade.gain | bignbr | addot }} €)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container noselect" v-if="user_trades && user_trades.history">
+        <div class="top">Trades history</div>
+        <div class="content">
+          <div class="deal noevents" v-for="(trade, id) in user_trades.history" :key="id">
+            <div class="title">
+              <div>{{ trade.type }} - {{ trade.market }}</div>
+              <div>
+<template v-if="trade.closed_gain > 0">+</template>{{ trade.closed_gain | bignbr | addot }}€
+              </div>
+            </div>
+            <div class="columns_container marged">
+              <div class="column">
+                <div class="BR_TL input_title bg_red">Stop-Loss</div>
+                <div class="BR_BL column_value">{{ trade.stop_loss | bignbr }} €</div>
+              </div>
+              <div class="column">
+                <div class="input_title bg_grey">Quantité</div>
+                <div class="column_value">{{ trade.amount | bignbr }} €</div>
+              </div>
+              <div class="column">
+                <div class="BR_TR input_title bg_green">Take-Profit</div>
+                <div class="BR_BR column_value">{{ trade.take_profit | bignbr }} €</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="container noselect" v-show="account && account.valid">
         <div class="top">Historique</div>
         <canvas class="content" id="chart"></canvas>
@@ -94,10 +163,10 @@
     </section>
 
     <section v-show="tab == 'contacts'">
-      <div class="contacts_container" v-show="!deal.target">
+      <div class="search_container" v-show="!deal.target">
         <input type="text"
           class="search"
-          placeholder="Chercher utilisateur"
+          placeholder="Chercher un utilisateur"
           v-model="user_search"
           @keyup="searchUser"
         >
@@ -150,13 +219,21 @@
             {{ (deal.type == "send" ? 'Envoyer' : 'Demander') }} l'argent
           </div>
         </div>
-
       </div>
     </section>
 
     <section v-show="tab == 'trading'">
+      <div class="search_container">
+        <input type="text"
+          class="search"
+          placeholder="Chercher un market"
+          v-model="market_search"
+          @keyup="marketFilter"
+        >
+      </div>
+
       <div class="markets">
-        <div class="market" v-for="symbol in account.fav_markets" :key="symbol">
+        <div class="market" v-for="symbol in market_filtered_list" :key="symbol">
           <div @click="selectMarket(symbol)" class="market_container">
             <iframe
               :src="'https://s.tradingview.com/embed-widget/mini-symbol'
@@ -178,6 +255,8 @@
 
     <section v-show="tab == 'market'">
       <div id="market_chart"></div>
+      <!-- eslint-disable-next-line -->
+      <svg id="fav_button" :class="{ fav: account.fav_markets && account.fav_markets.includes(market_selected) }" @click="fav_market" viewBox="0 0 100 100"><path d="M50.0018462,66.5256046 L33.0836299,75.4200373 L36.3147217,56.5813265 L22.6275971,43.2396775 L41.5427381,40.4911466 L50.0018462,23.3511213 L58.4609544,40.4911466 L77.3760953,43.2396775 L63.6889708,56.5813265 L66.9200626,75.4200373 L50.0018462,66.5256046 Z M50.0018462,60.8767259 L60.2794075,66.2799596 L58.3165679,54.835727 L66.6312896,46.7308765 L55.1406269,45.0611855 L50.0018462,34.6488787 L44.8630656,45.0611855 L33.3724029,46.7308765 L41.6871245,54.835727 L39.724285,66.2799596 L50.0018462,60.8767259 Z"/></svg>
     </section>
 
     <section v-if="tab == 'market_action'">
@@ -201,7 +280,6 @@
       </div>
 
       <div class="market_action_form">
-
         <div class="separator_title">Position</div>
         <div class="columns_container">
           <div class="column">
@@ -247,6 +325,16 @@
               :class="{ selected: market_action.leverage == 30 }">x
               30
             </div>
+          </div>
+        </div>
+
+        <div class="separator_title">Terminer</div>
+        <div class="switch">
+          <div class="choice" @click="tab = 'trading'">Retour</div>
+          <div class="choice selected" @click="newTrade" :class="{
+            red: market_action.type == 'SELL'
+          }">
+            {{ (market_action.type == "BUY" ? 'Acheter' : 'Vendre') }} {{ market_action.market }}
           </div>
         </div>
       </div>
@@ -296,6 +384,15 @@ export default {
         title: '',
         amount: null,
       },
+
+      user_trades: false,
+      show_history: false,
+
+      market_search: '',
+      market_list: [],
+      market_filtered_list: [],
+
+      market_selected: null,
 
       market_action: {
         market: null,
@@ -362,6 +459,7 @@ export default {
         this.account = account.data;
         this.pending_deals = this.account.deals.filter(d => d.DONE === 0);
         this.confirmed_deals = this.account.deals.filter(d => d.DONE === 1);
+        this.market_filtered_list = this.account.fav_markets;
 
         const chartData = [];
 
@@ -415,38 +513,119 @@ export default {
       });
     },
 
+    simply(str) {
+      return str.replace(/ /g, '').toUpperCase();
+    },
+
+    marketFilter() {
+      if (this.market_search === '') {
+        this.market_filtered_list = this.account.fav_markets;
+      } else {
+        this.market_filtered_list = this.market_list.filter(
+          m => this.simply(m.symbol).includes(this.simply(this.market_search))
+          || this.simply(m.name).includes(this.simply(this.market_search)),
+        ).map(m => m.symbol);
+      }
+    },
+
     selectMarket(market) {
-      console.log('SELECT', market);
       this.tab = 'market';
 
-      // eslint-disable-next-line
-      new TradingView.Widget({
-        autosize: true,
-        symbol: market,
-        interval: 'D',
-        timezone: 'Europe/Paris',
-        theme: 'dark',
-        style: 1,
-        locale: 'fr',
-        toolbar_bg: '#f1f3f6',
-        withdateranges: true,
-        hide_side_toolbar: false,
-        details: true,
-        container_id: 'market_chart',
-      });
+      if (this.market_selected !== market) {
+        this.market_selected = market;
+
+        // eslint-disable-next-line
+        new TradingView.Widget({
+          autosize: true,
+          symbol: market,
+          interval: 'D',
+          timezone: 'Europe/Paris',
+          theme: 'dark',
+          style: 1,
+          locale: 'fr',
+          toolbar_bg: '#f1f3f6',
+          withdateranges: true,
+          hide_side_toolbar: false,
+          details: true,
+          container_id: 'market_chart',
+        });
+      }
+    },
+
+    fav_market() {
+      if (!this.account.fav_markets.includes(this.market_selected)) {
+        this.api.setFavMarkets([...this.account.fav_markets, this.market_selected], (rs) => {
+          if (rs.success) this.account.fav_markets = rs.newlist;
+          this.marketFilter();
+        });
+      } else {
+        const nwlist = this.account.fav_markets.filter(m => m !== this.market_selected);
+        this.api.setFavMarkets(nwlist, (rs) => {
+          if (rs.success) this.account.fav_markets = rs.newlist;
+          this.marketFilter();
+        });
+      }
     },
 
     marketAction(market, type) {
       this.tab = 'market_action';
       this.market_action.market = market;
       this.market_action.type = type;
-      console.log('ACTION', this.market_action);
+    },
+
+    newTrade() {
+      this.api.newTrade(this.market_action, (rs) => {
+        if (rs.success) this.tab = 'trading';
+      });
+    },
+
+    closeTrade(id) {
+      this.toast.question('Are you sure you want to close this trade ?', 'Confirm', {
+        position: 'center',
+        overlay: true,
+        buttons: [
+          ['<button>YES</button>', (instance, toast) => {
+            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+            this.api.closeTrade(id, (rs) => {
+              console.log(rs);
+              if (rs.success) this.update_trades();
+            });
+          }, true],
+          ['<button>NO</button>', (instance, toast) => {
+            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          }],
+        ],
+      });
+    },
+
+    update_trades() {
+      this.api.getTrades((rs) => {
+        if (Object.keys(rs.trades).length >= 1) {
+          this.user_trades = { active: false, history: false };
+
+          Object.keys(rs.trades).forEach((key) => {
+            if (rs.trades[key].closed_date === null) {
+              if (!this.user_trades.active) this.user_trades.active = {};
+              this.user_trades.active[key] = rs.trades[key];
+            } else {
+              if (!this.user_trades.history) this.user_trades.history = {};
+              this.user_trades.history[key] = rs.trades[key];
+            }
+          });
+        } else this.user_trades = false;
+      });
     },
   },
 
   mounted() {
     this.refresh();
     this.api.onChanges(this.refresh);
+    this.api.fetchMarkets((rs) => {
+      this.market_list = rs;
+    });
+
+    this.update_trades();
+    setInterval(this.update_trades, 60000);
   },
 };
 </script>
@@ -549,7 +728,7 @@ input[type=number] {
   width: initial;
 }
 
-.contacts_container {
+.search_container {
   margin: 0 40px;
 }
 
@@ -649,8 +828,20 @@ input[type=number] {
   margin: 0 5px;
 }
 
+.columns_container.marged {
+  margin: 10px 15px 20px;
+}
+
 .column {
   width: 100%;
+  box-shadow: 0 -3px 8px #0000002e;
+}
+
+.column_value {
+  line-height: 23px;
+  font-size: 17px;
+  padding: 5px 15px;
+  background-color: #2c3e50;
 }
 
 .input {
@@ -663,7 +854,7 @@ input[type=number] {
 }
 
 .deal {
-  background-color: #00b176;
+  background-color: #2D4252;
   margin: 15px 5px;
   display: flex;
   flex-direction: column;
@@ -671,8 +862,10 @@ input[type=number] {
   box-shadow: 3px 3px 8px #0000002e;
 }
 
+.deal.green { background-color: #00b176 }
+
 .deal > .title {
-  background-color: #059263;
+  background-color: #384f61;
   display: flex;
   justify-content: space-between;
   border-radius: 5px 5px 0 0;
@@ -683,6 +876,8 @@ input[type=number] {
   font-weight: 600;
   user-select: none;
 }
+
+.deal.green > .title { background-color: #059263 }
 
 .deal > .bottom {
   display: flex;
@@ -695,8 +890,20 @@ input[type=number] {
   user-select: none;
 }
 
-.deal > .bottom > * {
-  width: 50%;
+.deal > .bottom_onebtn {
+  display: flex;
+  justify-content: space-around;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  box-shadow: 3px 3px 8px #00000061;
+  background-color: #b93847c9;
+  user-select: none;
+}
+
+
+.deal > .bottom > *,
+.deal > .bottom_onebtn > * {
+  width: 100%;
   font-size: 18px;
   padding: 10px;
   cursor: pointer;
@@ -707,8 +914,8 @@ input[type=number] {
   cursor: not-allowed;
 }
 
-.deal > .bottom > :not(.cancel):not(.disabled):hover { background-color: #059263 }
-.deal > .bottom > .cancel:not(.disabled):hover { background-color: #ff00008c }
+.deal :not(.cancel):not(.disabled):hover { background-color: #059263 }
+.deal .cancel:not(.disabled):hover { background-color: #ff00008c }
 
 .market {
   cursor: pointer;
@@ -825,6 +1032,20 @@ input[type=number] {
   max-width: 430px;
   height: 420px;
   margin-top: -25px
+}
+
+#fav_button {
+  cursor: pointer;
+  position: fixed;
+  bottom: 50px;
+  left: 0;
+  width: 53px;
+  fill: #787b86;
+}
+
+#fav_button.fav {
+  /* fill: #1976d2; */
+  fill: #26a69a;
 }
 
 </style>
