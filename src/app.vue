@@ -88,9 +88,8 @@ tr {
 .bg_grey { background-color: #293A48 }
 .bg_red { background-color: #b93847 }
 
-.noselect * {
-  user-select: none;
-}
+.noselect * { user-select: none }
+.noevents { pointer-events: none }
 
 .center { text-align: center }
 .BR_TL { border-top-left-radius: 5px }
