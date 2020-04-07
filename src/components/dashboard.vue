@@ -21,19 +21,19 @@
           <table>
             <tr>
               <td>Rentrées</td>
-              <td>{{ account.balance.got | bignbr | addot }} €</td>
+              <td>+ {{ account.balance.got | bignbr | addot }} €</td>
             </tr>
             <tr>
               <td>Dépenses</td>
-              <td>{{ account.balance.given | bignbr | addot }} €</td>
+              <td>- {{ account.balance.given | bignbr | addot }} €</td>
             </tr>
             <tr>
               <td>Rentrées Potentielles</td>
-              <td>{{ account.balance.haveto_get | bignbr | addot }} €</td>
+              <td>+ {{ account.balance.haveto_get | bignbr | addot }} €</td>
             </tr>
             <tr>
               <td>Dépenses potentielles</td>
-              <td>{{ account.balance.haveto_give | bignbr | addot }} €</td>
+              <td>- {{ account.balance.haveto_give | bignbr | addot }} €</td>
             </tr>
           </table>
         </div>
@@ -94,7 +94,7 @@
             <div class="title">
               <div>{{ trade.type }} - {{ trade.market }}</div>
               <div>
-<template v-if="trade.variation > 0">+</template>{{ trade.variation * 100 | bignbr | addot }}%
+                {{ trade.variation * 100 | bignbr | addot | add_plus }}%
                 (x{{ trade.leverage }})
               </div>
             </div>
@@ -121,7 +121,7 @@
             <div class="bottom_onebtn">
               <div class="cancel" @click="closeTrade(id)">
                 Fermer
-                (<template v-if="trade.gain > 0">+</template>{{ trade.gain | bignbr | addot }} €)
+                ({{ trade.gain | bignbr | addot | add_plus }} €)
               </div>
             </div>
           </div>
@@ -134,9 +134,20 @@
           <div class="deal noevents" v-for="(trade, id) in user_trades.history" :key="id">
             <div class="title">
               <div>{{ trade.type }} - {{ trade.market }}</div>
-              <div>
-<template v-if="trade.closed_gain > 0">+</template>{{ trade.closed_gain | bignbr | addot }}€
+              <div>{{ trade.closed_gain | bignbr | addot | add_plus }} €</div>
+            </div>
+            <div class="flex">
+              <div>{{ trade.price | bignbr | addot}}</div>
+              <div :class="{
+                text_green: trade.price < trade.closed_price,
+                text_red: trade.price > trade.closed_price,
+              }">
+                {{
+                  ((trade.closed_price - trade.price) / trade.price) * 100
+                  | round(1) | add_plus
+                }} %
               </div>
+              <div>{{ trade.closed_price | bignbr | addot}}</div>
             </div>
             <div class="columns_container marged">
               <div class="column">
@@ -399,8 +410,8 @@ export default {
         type: null,
         amount: 100,
         leverage: 1,
-        TP: 10,
-        SL: 10,
+        TP: 50,
+        SL: 50,
       },
     };
   },
@@ -587,7 +598,6 @@ export default {
           ['<button>YES</button>', (instance, toast) => {
             instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
             this.api.closeTrade(id, (rs) => {
-              console.log(rs);
               if (rs.success) this.update_trades();
             });
           }, true],
