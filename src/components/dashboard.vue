@@ -707,6 +707,7 @@ export default {
   justify-content: center;
   box-shadow: 0 3px 8px #0000002e;
   opacity: 0.9;
+  z-index: 15;
 }
 
 .header > .logo_text {
@@ -1007,6 +1008,7 @@ input[type=number] {
   font-size: 20px;
   text-shadow: 0 0 3px #0000002e;
   box-shadow: 0 -3px 8px #0000002e;
+  z-index: 15;
 }
 
 .footer > .tab {
