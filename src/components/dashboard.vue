@@ -365,9 +365,8 @@
 </template>
 
 <script>
-// import filters from '@/filters';
 import ChartJS from 'chart.js';
-import filters from '@/filters.js';
+import filters from '@/filters';
 import logo from '@/components/logo.vue';
 
 export default {

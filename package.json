@@ -12,6 +12,7 @@
     "core-js": "^3.4.4",
     "crypto-js": "^4.0.0",
     "firebase": "^7.9.1",
+    "izitoast": "^1.4.0",
     "moment": "^2.24.0",
     "vue": "^2.6.10",
     "vue-izitoast": "^1.2.1"

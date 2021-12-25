@@ -4,13 +4,7 @@ import 'izitoast/dist/css/iziToast.min.css';
 import app from './app.vue';
 import api from './api';
 
-if (window.location.protocol !== 'https:' && window.location.port !== '8080') {
-  window.location.replace(`https:${window.location.href.substring(window.location.protocol.length)}`);
-}
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 
 Vue.config.productionTip = false;
 
