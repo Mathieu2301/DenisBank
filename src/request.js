@@ -1,4 +1,8 @@
-const api = 'denisbank.apis.colmon.fr';
+const api = (
+  process.env.NODE_ENV !== 'development'
+    ? 'denisbank.apis.colmon.fr'
+    : 'localhost:3000'
+);
 
 function rq(type) {
   return function request(data = {}, callback = () => {}) {
