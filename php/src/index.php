@@ -748,15 +748,13 @@ function sendPush($token, $title, $body) {
     ],
   ]);
 
-  $headers = array(
-    'Content-Type:application/json',
-    'Authorization:key=' . $_ENV['FIREBASE_SERVER_KEY'],
-  );
-
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
   curl_setopt($ch, CURLOPT_POST, true);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type:application/json',
+    'Authorization:key=' . $_ENV['FCM_KEY'],
+  ]);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

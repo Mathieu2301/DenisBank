@@ -45,7 +45,10 @@ API de l'application DenisBank (ancêtre de [CandleVault](https://github.com/Mat
     MYSQL_USER=denisbank
     MYSQL_PASS=denisbank
     MYSQL_DB=denisbank
+    FCM_KEY=AAAA...
     ```
+
+    La variable `FCM_KEY` contient la clé d'API Firebase Cloud Messaging.
 
 4. Lancer le script `dev.sh`:
 
@@ -67,6 +70,7 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASS=${MYSQL_PASS}
       - MYSQL_DB=${MYSQL_DB}
+      - FCM_KEY=${FCM_KEY}
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.denisbank-api.rule=Host(`${SERVER_URL}`)'

@@ -13,4 +13,5 @@ docker run \
   -e MYSQL_USER=${MYSQL_USER} \
   -e MYSQL_PASS=${MYSQL_PASS} \
   -e MYSQL_DB=${MYSQL_DB} \
+  -e FCM_KEY=${FCM_KEY} \
   denisbank-api
